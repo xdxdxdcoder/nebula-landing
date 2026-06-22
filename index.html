@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nebula — аналитика, которая опережает</title>
+<style>
+  :root {
+    --bg: #07070d;
+    --bg2: #0d0e1b;
+    --text: #f4f5ff;
+    --muted: #9ea4c9;
+    --accent: #6c5cff;
+    --accent2: #18d6c2;
+    --card: rgba(255,255,255,.04);
+    --stroke: rgba(255,255,255,.09);
+    --maxw: 1140px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Inter, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6;
+    overflow-x: hidden;
+  }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+  .grad-text { background: linear-gradient(120deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer;
+    padding: 13px 24px; border-radius: 12px; border: 1px solid transparent; transition: .2s;
+  }
+  .btn-primary { background: linear-gradient(120deg, var(--accent), var(--accent2)); color: #06060c; }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(108,92,255,.4); }
+  .btn-ghost { border-color: var(--stroke); color: var(--text); }
+  .btn-ghost:hover { background: var(--card); }
+  .eyebrow { color: var(--accent2); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-size: 12px; }
+  section { padding: 90px 0; position: relative; }
+  h2.section-title { font-size: clamp(28px, 4vw, 44px); font-weight: 800; line-height: 1.15; margin: 12px 0 14px; }
+  .section-sub { color: var(--muted); max-width: 620px; }
+
+  /* NAV */
+  header {
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(14px);
+    background: rgba(7,7,13,.6);
+    border-bottom: 1px solid transparent; transition: border .3s;
+  }
+  header.scrolled { border-bottom: 1px solid var(--stroke); }
+  nav { display: flex; align-items: center; justify-content: space-between; height: 68px; }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 19px; }
+  .logo .orb { width: 26px; height: 26px; border-radius: 50%;
+    background: conic-gradient(from 0deg, var(--accent), var(--accent2), var(--accent)); box-shadow: 0 0 20px rgba(108,92,255,.6); }
+  .nav-links { display: flex; gap: 30px; align-items: center; }
+  .nav-links a { color: var(--muted); font-size: 15px; transition: .2s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta { display: flex; gap: 12px; align-items: center; }
+  .burger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: 0; padding: 8px; }
+  .burger span { width: 24px; height: 2px; background: var(--text); border-radius: 2px; transition: .3s; }
+  @media (max-width: 860px) {
+    .nav-links, .nav-cta .btn-ghost { display: none; }
+    .burger { display: flex; }
+    .mobile-menu { display: flex; }
+  }
+  .mobile-menu {
+    display: none; position: fixed; inset: 68px 0 auto 0; flex-direction: column; gap: 4px;
+    background: var(--bg2); border-bottom: 1px solid var(--stroke); padding: 16px 24px 24px;
+    transform: translateY(-120%); transition: transform .3s; z-index: 49;
+  }
+  .mobile-menu.open { transform: translateY(0); }
+  .mobile-menu a { padding: 12px 0; color: var(--muted); border-bottom: 1px solid var(--stroke); }
+
+  /* HERO */
+  .hero { padding-top: 70px; text-align: center; overflow: hidden; }
+  .hero-glow { position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
+    width: 900px; height: 600px; pointer-events: none; z-index: 0;
+    background: radial-gradient(circle at 50% 40%, rgba(108,92,255,.35), transparent 60%); filter: blur(40px); }
+  .hero .wrap { position: relative; z-index: 1; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 99px;
+    border: 1px solid var(--stroke); background: var(--card); font-size: 13px; color: var(--muted); margin-bottom: 26px;
+  }
+  .badge .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--accent2); box-shadow: 0 0 0 0 rgba(24,214,194,.6); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(24,214,194,.6)} 70%{box-shadow:0 0 0 10px rgba(24,214,194,0)} 100%{box-shadow:0 0 0 0 rgba(24,214,194,0)} }
+  .hero h1 { font-size: clamp(38px, 6.5vw, 72px); font-weight: 800; line-height: 1.05; letter-spacing: -1.5px; }
+  .hero p.lead { color: var(--muted); font-size: clamp(16px,2.2vw,20px); max-width: 600px; margin: 22px auto 34px; }
+  .hero-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .trust { margin-top: 46px; color: var(--muted); font-size: 13px; letter-spacing: 1px; }
+  .logos { display: flex; gap: 38px; justify-content: center; flex-wrap: wrap; margin-top: 18px; opacity: .6; font-weight: 700; font-size: 18px; }
+
+  /* dashboard mock */
+  .mock {
+    margin: 64px auto 0; max-width: 940px; border-radius: 18px; overflow: hidden;
+    border: 1px solid var(--stroke); background: linear-gradient(180deg, #11121f, #0a0a14);
+    box-shadow: 0 40px 120px rgba(0,0,0,.6);
+  }
+  .mock-bar { display: flex; align-items: center; gap: 8px; padding: 14px 18px; border-bottom: 1px solid var(--stroke); }
+  .mock-bar i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .mock-body { display: grid; grid-template-columns: 180px 1fr; min-height: 340px; }
+  .mock-side { border-right: 1px solid var(--stroke); padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+  .mock-side .it { height: 12px; border-radius: 6px; background: rgba(255,255,255,.07); }
+  .mock-side .it.on { background: linear-gradient(90deg, var(--accent), transparent); width: 80%; }
+  .mock-main { padding: 22px; }
+  .stat-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 20px; }
+  .stat { background: var(--card); border: 1px solid var(--stroke); border-radius: 12px; padding: 14px; }
+  .stat .k { color: var(--muted); font-size: 12px; }
+  .stat .v { font-size: 24px; font-weight: 800; margin-top: 4px; }
+  .stat .v small { font-size: 13px; color: var(--accent2); }
+  .chart { height: 150px; display: flex; align-items: flex-end; gap: 8px; padding-top: 10px; }
+  .chart .col { flex: 1; border-radius: 6px 6px 0 0; background: linear-gradient(180deg, var(--accent), rgba(24,214,194,.3)); animation: grow 1.2s ease both; }
+  @keyframes grow { from { height: 0 } }
+
+  /* FEATURES */
+  .features-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-top: 50px; }
+  @media (max-width: 860px){ .features-grid{ grid-template-columns: 1fr } .stat-row{ grid-template-columns:1fr } .mock-body{ grid-template-columns:1fr } .mock-side{ display:none } }
+  .feature {
+    background: var(--card); border: 1px solid var(--stroke); border-radius: 16px; padding: 26px;
+    transition: .25s; position: relative; overflow: hidden;
+  }
+  .feature:hover { transform: translateY(-4px); border-color: rgba(108,92,255,.5); background: rgba(108,92,255,.06); }
+  .feature .ico { width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center;
+    background: linear-gradient(135deg, rgba(108,92,255,.25), rgba(24,214,194,.2)); margin-bottom: 16px; }
+  .feature h3 { font-size: 18px; margin-bottom: 8px; }
+  .feature p { color: var(--muted); font-size: 14px; }
+
+  /* PRICING */
+  .toggle { display: inline-flex; align-items: center; gap: 12px; margin: 24px auto 0; color: var(--muted); }
+  .switch { width: 52px; height: 28px; border-radius: 99px; background: var(--card); border: 1px solid var(--stroke); position: relative; cursor: pointer; }
+  .switch::after { content:''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%;
+    background: linear-gradient(120deg,var(--accent),var(--accent2)); transition: .25s; }
+  .switch.on::after { left: 27px; }
+  .save { color: var(--accent2); font-size: 12px; font-weight: 700; background: rgba(24,214,194,.12); padding: 3px 8px; border-radius: 99px; }
+  .pricing-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-top: 40px; }
+  @media (max-width: 860px){ .pricing-grid{ grid-template-columns:1fr } }
+  .plan { background: var(--card); border: 1px solid var(--stroke); border-radius: 18px; padding: 30px; position: relative; }
+  .plan.pop { border-color: var(--accent); background: linear-gradient(180deg, rgba(108,92,255,.12), var(--card)); transform: scale(1.03); }
+  .plan .tag { position: absolute; top: -12px; right: 24px; background: linear-gradient(120deg,var(--accent),var(--accent2)); color:#06060c; font-size:12px; font-weight:700; padding:4px 12px; border-radius:99px; }
+  .plan h3 { font-size: 18px; }
+  .price { font-size: 44px; font-weight: 800; margin: 14px 0 2px; }
+  .price small { font-size: 16px; color: var(--muted); font-weight: 500; }
+  .plan ul { list-style: none; margin: 20px 0; display: flex; flex-direction: column; gap: 12px; }
+  .plan li { color: var(--muted); font-size: 14px; display: flex; gap: 10px; }
+  .plan li::before { content: '✓'; color: var(--accent2); font-weight: 800; }
+  .plan .btn { width: 100%; justify-content: center; }
+
+  /* TESTIMONIALS */
+  .quotes { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-top: 50px; }
+  @media (max-width: 860px){ .quotes{ grid-template-columns:1fr } }
+  .quote { background: var(--card); border: 1px solid var(--stroke); border-radius: 16px; padding: 26px; }
+  .quote p { font-size: 15px; margin-bottom: 18px; }
+  .who { display: flex; align-items: center; gap: 12px; }
+  .ava { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg,var(--accent),var(--accent2)); display: grid; place-items: center; font-weight: 700; color: #06060c; }
+  .who b { display: block; font-size: 14px; } .who span { font-size: 12px; color: var(--muted); }
+
+  /* FAQ */
+  .faq { max-width: 760px; margin: 40px auto 0; }
+  .qa { border-bottom: 1px solid var(--stroke); }
+  .qa button { width: 100%; text-align: left; background: none; border: 0; color: var(--text); font-size: 16px; font-weight: 600;
+    padding: 22px 0; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+  .qa .ans { max-height: 0; overflow: hidden; transition: max-height .3s; color: var(--muted); }
+  .qa.open .ans { max-height: 200px; }
+  .qa.open .qa-plus { transform: rotate(45deg); }
+  .qa-plus { transition: .3s; font-size: 22px; color: var(--accent2); }
+  .qa .ans p { padding-bottom: 22px; }
+
+  /* CTA */
+  .cta-band { text-align: center; background: linear-gradient(120deg, rgba(108,92,255,.18), rgba(24,214,194,.14));
+    border: 1px solid var(--stroke); border-radius: 24px; padding: 60px 24px; margin: 40px 0; }
+  .cta-band h2 { font-size: clamp(26px,4vw,40px); font-weight: 800; }
+  .cta-band p { color: var(--muted); margin: 14px auto 28px; max-width: 480px; }
+
+  footer { border-top: 1px solid var(--stroke); padding: 40px 0; color: var(--muted); }
+  .foot { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 20px; align-items: center; }
+  .foot-links { display: flex; gap: 24px; flex-wrap: wrap; }
+  .foot-links a:hover { color: var(--text); }
+
+  /* reveal on scroll */
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity .7s, transform .7s; }
+  .reveal.show { opacity: 1; transform: none; }
+</style>
+</head>
+<body>
+  <header id="hdr">
+    <div class="wrap">
+      <nav>
+        <a class="logo" href="#"><span class="orb"></span> Nebula</a>
+        <div class="nav-links">
+          <a href="#features">Возможности</a>
+          <a href="#pricing">Цены</a>
+          <a href="#reviews">Отзывы</a>
+          <a href="#faq">FAQ</a>
+        </div>
+        <div class="nav-cta">
+          <a class="btn btn-ghost" href="#">Войти</a>
+          <a class="btn btn-primary" href="#pricing">Начать бесплатно</a>
+          <button class="burger" id="burger"><span></span><span></span><span></span></button>
+        </div>
+      </nav>
+    </div>
+  </header>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#features">Возможности</a>
+    <a href="#pricing">Цены</a>
+    <a href="#reviews">Отзывы</a>
+    <a href="#faq">FAQ</a>
+    <a href="#pricing">Начать бесплатно</a>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-glow"></div>
+    <div class="wrap">
+      <span class="badge"><span class="pulse"></span> v3.0 — теперь с предиктивной аналитикой</span>
+      <h1>Данные говорят.<br><span class="grad-text">Nebula переводит.</span></h1>
+      <p class="lead">Платформа аналитики, которая превращает сырые события в решения за секунды. Без SQL, без дата-инженеров, без ожидания.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="#pricing">Попробовать 14 дней →</a>
+        <a class="btn btn-ghost" href="#features">▶ Смотреть демо</a>
+      </div>
+      <div class="trust">НАМ ДОВЕРЯЮТ КОМАНДЫ В</div>
+      <div class="logos"><span>Vortex</span><span>Lumio</span><span>Северсталь</span><span>Quanta</span><span>Helio</span></div>
+
+      <!-- dashboard mock -->
+      <div class="mock reveal">
+        <div class="mock-bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i>
+          <span style="margin-left:12px;color:var(--muted);font-size:13px">app.nebula.io/dashboard</span></div>
+        <div class="mock-body">
+          <div class="mock-side">
+            <div class="it on"></div><div class="it"></div><div class="it"></div><div class="it"></div><div class="it"></div><div class="it"></div>
+          </div>
+          <div class="mock-main">
+            <div class="stat-row">
+              <div class="stat"><div class="k">Активные пользователи</div><div class="v">48.2K <small>↑ 12%</small></div></div>
+              <div class="stat"><div class="k">Конверсия</div><div class="v">6.4% <small>↑ 0.8%</small></div></div>
+              <div class="stat"><div class="k">Выручка / мес</div><div class="v">₽3.1M <small>↑ 24%</small></div></div>
+            </div>
+            <div class="chart" id="chart"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="wrap">
+      <div class="reveal">
+        <span class="eyebrow">Возможности</span>
+        <h2 class="section-title">Всё, чтобы понимать продукт<br>лучше конкурентов</h2>
+        <p class="section-sub">Один SDK — и вы видите весь путь пользователя, от первого клика до повторной покупки.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature reveal"><div class="ico">⚡</div><h3>Реальное время</h3><p>События обрабатываются за &lt;200мс. Никаких ночных батчей — данные актуальны всегда.</p></div>
+        <div class="feature reveal"><div class="ico">🧠</div><h3>Предиктивный AI</h3><p>Модель предсказывает отток и LTV до того, как клиент уйдёт. Действуйте на опережение.</p></div>
+        <div class="feature reveal"><div class="ico">🔌</div><h3>50+ интеграций</h3><p>Stripe, Amplitude, Slack, Postgres — подключаются в один клик, без кода.</p></div>
+        <div class="feature reveal"><div class="ico">🔍</div><h3>Воронки без SQL</h3><p>Стройте многошаговые воронки мышкой. Drag & drop вместо запросов на 200 строк.</p></div>
+        <div class="feature reveal"><div class="ico">🛡️</div><h3>Безопасность</h3><p>SOC 2, шифрование на лету, хранение данных в РФ и ЕС. GDPR из коробки.</p></div>
+        <div class="feature reveal"><div class="ico">🤝</div><h3>Совместная работа</h3><p>Дашборды, комментарии, алёрты в Slack. Вся команда смотрит на одни цифры.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing" style="background:var(--bg2)">
+    <div class="wrap" style="text-align:center">
+      <div class="reveal">
+        <span class="eyebrow">Тарифы</span>
+        <h2 class="section-title">Честные цены без сюрпризов</h2>
+        <div class="toggle">
+          <span>Месяц</span>
+          <div class="switch" id="switch"></div>
+          <span>Год <span class="save">−20%</span></span>
+        </div>
+      </div>
+      <div class="pricing-grid">
+        <div class="plan reveal">
+          <h3>Старт</h3>
+          <div class="price"><span data-m="0" data-y="0">₽0</span><small>/мес</small></div>
+          <p style="color:var(--muted);font-size:14px">Для пет-проектов и тестов</p>
+          <ul><li>До 10К событий/мес</li><li>3 дашборда</li><li>7 дней истории</li><li>Email-поддержка</li></ul>
+          <a class="btn btn-ghost" href="#">Начать бесплатно</a>
+        </div>
+        <div class="plan pop reveal">
+          <span class="tag">Популярный</span>
+          <h3>Профи</h3>
+          <div class="price"><span data-m="2900" data-y="2320">₽2900</span><small>/мес</small></div>
+          <p style="color:var(--muted);font-size:14px">Для растущих команд</p>
+          <ul><li>До 5М событий/мес</li><li>Безлимит дашбордов</li><li>Предиктивный AI</li><li>12 мес истории</li><li>Приоритетная поддержка</li></ul>
+          <a class="btn btn-primary" href="#">Выбрать Профи</a>
+        </div>
+        <div class="plan reveal">
+          <h3>Бизнес</h3>
+          <div class="price"><span data-m="9900" data-y="7920">₽9900</span><small>/мес</small></div>
+          <p style="color:var(--muted);font-size:14px">Для крупных продуктов</p>
+          <ul><li>Безлимит событий</li><li>SSO / SAML</li><li>Выделенный менеджер</li><li>SLA 99.99%</li><li>On-premise опция</li></ul>
+          <a class="btn btn-ghost" href="#">Связаться с нами</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIEWS -->
+  <section id="reviews">
+    <div class="wrap">
+      <div class="reveal" style="text-align:center">
+        <span class="eyebrow">Отзывы</span>
+        <h2 class="section-title">Командам с Nebula спокойнее</h2>
+      </div>
+      <div class="quotes">
+        <div class="quote reveal"><p>«Сократили время на отчёты с 2 дней до 10 минут. Команда наконец смотрит в одни цифры, а не спорит о выгрузках.»</p>
+          <div class="who"><div class="ava">АК</div><div><b>Анна Климова</b><span>Head of Product, Lumio</span></div></div></div>
+        <div class="quote reveal"><p>«Предиктивный отток окупил подписку за первый месяц. Поймали 18% клиентов, которые собирались уйти.»</p>
+          <div class="who"><div class="ava">ДМ</div><div><b>Дмитрий Морозов</b><span>CEO, Vortex</span></div></div></div>
+        <div class="quote reveal"><p>«Внедрили за вечер. SDK честно ставится в одну строку, а воронки строит даже наш маркетолог без SQL.»</p>
+          <div class="who"><div class="ava">ИП</div><div><b>Игорь Петров</b><span>CTO, Quanta</span></div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" style="background:var(--bg2)">
+    <div class="wrap">
+      <div class="reveal" style="text-align:center">
+        <span class="eyebrow">FAQ</span>
+        <h2 class="section-title">Частые вопросы</h2>
+      </div>
+      <div class="faq" id="faqList">
+        <div class="qa"><button>Сколько занимает внедрение? <span class="qa-plus">+</span></button><div class="ans"><p>Базовый SDK ставится в одну строку и начинает слать события сразу. Полная настройка воронок и дашбордов — около часа.</p></div></div>
+        <div class="qa"><button>Где хранятся данные? <span class="qa-plus">+</span></button><div class="ans"><p>В дата-центрах в РФ или ЕС на ваш выбор. Всё шифруется при передаче и хранении, соответствие GDPR и 152-ФЗ.</p></div></div>
+        <div class="qa"><button>Можно отменить в любой момент? <span class="qa-plus">+</span></button><div class="ans"><p>Да. Подписка помесячная, без скрытых условий. Отмена в один клик, данные доступны для экспорта 30 дней.</p></div></div>
+        <div class="qa"><button>Есть ли бесплатный тариф? <span class="qa-plus">+</span></button><div class="ans"><p>Да, тариф «Старт» бесплатен навсегда: до 10К событий в месяц и 3 дашборда. Карта не требуется.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section style="padding-top:40px">
+    <div class="wrap">
+      <div class="cta-band reveal">
+        <h2>Готовы увидеть продукт <span class="grad-text">насквозь</span>?</h2>
+        <p>14 дней бесплатно. Без карты. Настройка за час.</p>
+        <a class="btn btn-primary" href="#" style="font-size:17px">Запустить Nebula →</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap foot">
+      <a class="logo" href="#"><span class="orb"></span> Nebula</a>
+      <div class="foot-links">
+        <a href="#features">Возможности</a><a href="#pricing">Цены</a><a href="#faq">FAQ</a>
+        <a href="#">Документация</a><a href="#">Блог</a>
+      </div>
+      <span style="font-size:13px">© 2026 Nebula Analytics</span>
+    </div>
+  </footer>
+
+<script>
+  // sticky header shadow
+  const hdr = document.getElementById('hdr');
+  addEventListener('scroll', () => hdr.classList.toggle('scrolled', scrollY > 10));
+
+  // mobile menu
+  const burger = document.getElementById('burger'), mm = document.getElementById('mobileMenu');
+  burger.onclick = () => mm.classList.toggle('open');
+  mm.querySelectorAll('a').forEach(a => a.onclick = () => mm.classList.remove('open'));
+
+  // chart bars
+  const chart = document.getElementById('chart');
+  const vals = [40,62,48,70,55,82,60,90,72,98,80,64];
+  chart.innerHTML = vals.map((v,i) => `<div class="col" style="height:${v}%;animation-delay:${i*.06}s"></div>`).join('');
+
+  // pricing toggle
+  const sw = document.getElementById('switch');
+  sw.onclick = () => {
+    sw.classList.toggle('on');
+    const yearly = sw.classList.contains('on');
+    document.querySelectorAll('.price span[data-m]').forEach(s => {
+      const val = yearly ? s.dataset.y : s.dataset.m;
+      s.textContent = '₽' + Number(val).toLocaleString('ru-RU');
+    });
+    document.querySelectorAll('.price small').forEach(s => s.textContent = yearly ? '/мес · год' : '/мес');
+  };
+
+  // FAQ accordion
+  document.querySelectorAll('.qa button').forEach(b => b.onclick = () => {
+    const qa = b.parentElement;
+    document.querySelectorAll('.qa').forEach(x => x !== qa && x.classList.remove('open'));
+    qa.classList.toggle('open');
+  });
+
+  // reveal on scroll
+  const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && e.target.classList.add('show')), { threshold: .12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>
