@@ -2,6 +2,8 @@
 
 A landing page for a fictional analytics startup. Looks like the website of a real, funded company.
 
+**▶ [Live demo](https://xdxdxdcoder.github.io/nebula-landing/)**
+
 ![vanilla](https://img.shields.io/badge/JS-vanilla-yellow) ![responsive](https://img.shields.io/badge/responsive-yes-brightgreen) ![no build](https://img.shields.io/badge/build-none-blue)
 
 ## Features
